@@ -1,0 +1,22 @@
+{
+  "name": "sensor-webserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ditw11mhs/sensor-webserver.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ditw11mhs/sensor-webserver/issues"
+  },
+  "homepage": "https://github.com/ditw11mhs/sensor-webserver#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
