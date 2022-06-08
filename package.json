@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,10 @@
   },
   "homepage": "https://github.com/ditw11mhs/sensor-webserver#readme",
   "dependencies": {
-    "express": "^4.18.1"
+    "@prisma/client": "^3.14.0",
+    "express": "^4.18.1",
+    "express-validation": "^4.1.0",
+    "nodemon": "^2.0.16",
+    "prisma": "^3.14.0"
   }
 }
