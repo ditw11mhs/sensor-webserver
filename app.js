@@ -16,6 +16,13 @@ const esp32Payload = {
   }),
 };
 
+const userPayload={
+  body: Joi.object({
+    UserID: Joi.string().required(),
+    DeviceID: Joi.string().required(),
+  })
+}
+
 
 // Test
 app.get("/", (req, res) => {
@@ -31,6 +38,14 @@ app.post(
     res.json([DeviceID, Sensor1, Sensor2, Sensor3]);
   }
 );
+
+// Get from Database
+app.get("/datastream/get",validate(userPayload,{},{}),async (req,res)=>{
+  const {UserID,DeviceID}=req.body;
+  res.json([UserID,DeviceID]);
+})
+
+
 
 app.use(function (err, req, res, next) {
   if (err instanceof ValidationError) {
