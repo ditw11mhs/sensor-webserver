@@ -18,7 +18,6 @@ const esp32Payload = {
 
 const userPayload = {
   body: Joi.object({
-    UserID: Joi.string().required(),
     DeviceID: Joi.string().required(),
   }),
 };
@@ -28,20 +27,79 @@ app.get("/", (req, res) => {
   res.send("Test");
 });
 
-// Add to Database
+// Update Data in Database
 app.post(
-  "/datastream/add",
+  "/datastream/update",
   validate(esp32Payload, {}, {}),
   async (req, res) => {
     const { DeviceID, Sensor1, Sensor2, Sensor3 } = req.body;
-    res.json([DeviceID, Sensor1, Sensor2, Sensor3]);
+    const result = await prisma.datastream.upsert({
+      where: { DeviceID: String(DeviceID) },
+      update: {
+        Sensor1: Number(Sensor1),
+        Sensor2: Number(Sensor2),
+        Sensor3: Number(Sensor3),
+        createdAt: new Date(),
+        Logs: {
+          create: {
+            Sensor1: Number(Sensor1),
+            Sensor2: Number(Sensor2),
+            Sensor3: Number(Sensor3),
+          },
+        },
+      },
+      create: {
+        DeviceID: DeviceID,
+        Sensor1: Number(Sensor1),
+        Sensor2: Number(Sensor2),
+        Sensor3: Number(Sensor3),
+        Logs: {
+          create: {
+            Sensor1: Number(Sensor1),
+            Sensor2: Number(Sensor2),
+            Sensor3: Number(Sensor3),
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: { Logs: true },
+        },
+      },
+    });
+
+    if (result._count.Logs > 10) {
+      const oldestLog = await prisma.datalog.findFirst({
+        where: { DeviceID: String(DeviceID) },
+        orderBy: { createdAt: "asc" },
+      });
+      const deleteoldestLog = await prisma.datalog.delete({
+        where: { createdAt: oldestLog.createdAt },
+      });
+      res.json(result);
+    } else {
+      res.json(result);
+    }
   }
 );
 
-// Get from Database
+// Get stream from Database
 app.get("/datastream/get", validate(userPayload, {}, {}), async (req, res) => {
-  const { UserID, DeviceID } = req.body;
-  res.json([UserID, DeviceID]);
+  const { DeviceID } = req.body;
+  const result = await prisma.datastream.findUnique({
+    where: { DeviceID: String(DeviceID) },
+  });
+  res.json([result]);
+});
+
+// Get logs from Database
+app.get("/datalog/get", validate(userPayload, {}, {}), async (req, res) => {
+  const { DeviceID } = req.body;
+  const result = await prisma.datastream.findUnique({
+    where: { DeviceID: String(DeviceID) },
+    include: { Logs: true },
+  });
+  res.json([result]);
 });
 
 app.use(function (err, req, res, next) {

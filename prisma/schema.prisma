@@ -15,5 +15,16 @@ model Datastream {
   Sensor1  Float
   Sensor2  Float
   Sensor3  Float
+  Logs     Datalog[]
   createdAt DateTime @default(now())
 }
+
+model Datalog{
+  Device Datastream @relation(fields: [DeviceID],references: [DeviceID])
+  DeviceID String @db.VarChar(255)
+  Sensor1  Float
+  Sensor2  Float
+  Sensor3  Float
+  createdAt DateTime @id @default(now())
+}
+

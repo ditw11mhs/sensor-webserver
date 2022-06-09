@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/ditw11mhs/sensor-webserver#readme",
   "dependencies": {
-    "@prisma/client": "^3.14.0",
+    "@prisma/client": "^3.15.0",
     "express": "^4.18.1",
     "express-validation": "^4.1.0",
     "nodemon": "^2.0.16",

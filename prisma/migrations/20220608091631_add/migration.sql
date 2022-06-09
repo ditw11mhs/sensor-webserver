@@ -1,0 +1,2 @@
+-- AddForeignKey
+ALTER TABLE `Datalog` ADD CONSTRAINT `Datalog_DeviceID_fkey` FOREIGN KEY (`DeviceID`) REFERENCES `Datastream`(`DeviceID`) ON DELETE RESTRICT ON UPDATE CASCADE;
