@@ -108,7 +108,7 @@ app.get("/datastream/get", validate(userPayload, {}, {}), async (req, res) => {
       createdAt: false,
     },
   });
-  res.json([result]);
+  res.json(result);
 });
 
 // Get logs from Database
@@ -116,8 +116,15 @@ app.get("/datalog/get", validate(userPayload, {}, {}), async (req, res) => {
   const { DeviceID } = req.body;
   const result = await prisma.datalog.findMany({
     where: { DeviceID: String(DeviceID) },
+    select: {
+      DeviceID: false,
+      Sensor1: true,
+      Sensor2: true,
+      Sensor3: true,
+      createdAt: true,
+    },
   });
-  res.json([result]);
+  res.json(result);
 });
 
 // Update Servo Angle
@@ -133,7 +140,7 @@ app.post(
         createdAt: new Date(),
       },
     });
-    res.status(200);
+    res.status(200).json(result);
   }
 );
 
@@ -148,6 +155,7 @@ app.get("/servo/get", validate(userPayload, {}, {}), async (req, res) => {
       createdAt: false,
     },
   });
+  res.json(result);
 });
 
 app.use(function (err, req, res, next) {
