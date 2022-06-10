@@ -88,9 +88,9 @@ app.post(
       const deleteoldestLog = await prisma.datalog.delete({
         where: { createdAt: oldestLog.createdAt },
       });
-      res.status(200);
+      res.status(200).json(result, deleteoldestLog);
     } else {
-      res.status(200);
+      res.status(200).json(result);
     }
   }
 );
