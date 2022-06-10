@@ -11,20 +11,27 @@ datasource db {
 }
 
 model Datastream {
-  DeviceID String @id @db.VarChar(255)
-  Sensor1  Float
-  Sensor2  Float
-  Sensor3  Float
-  Logs     Datalog[]
-  createdAt DateTime @default(now())
+  DeviceID  String    @id @db.VarChar(255)
+  Sensor1   Float
+  Sensor2   Float
+  Sensor3   Float
+  Logs      Datalog[]
+  Servo     Servo[]
+  createdAt DateTime  @default(now())
 }
 
-model Datalog{
-  Device Datastream @relation(fields: [DeviceID],references: [DeviceID])
-  DeviceID String @db.VarChar(255)
-  Sensor1  Float
-  Sensor2  Float
-  Sensor3  Float
-  createdAt DateTime @id @default(now())
+model Datalog {
+  Device    Datastream @relation(fields: [DeviceID], references: [DeviceID])
+  DeviceID  String     @db.VarChar(255)
+  Sensor1   Float      @db.Float
+  Sensor2   Float      @db.Float
+  Sensor3   Float      @db.Float
+  createdAt DateTime   @id @default(now())
 }
 
+model Servo {
+  Device    Datastream @relation(fields: [DeviceID], references: [DeviceID])
+  DeviceID  String     @db.VarChar(255)
+  Angle     Float      @default(0) @db.Float
+  createdAt DateTime   @id @default(now())
+}

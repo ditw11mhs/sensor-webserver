@@ -1,0 +1,16 @@
+-- AlterTable
+ALTER TABLE `Datalog` MODIFY `Sensor1` FLOAT NOT NULL,
+    MODIFY `Sensor2` FLOAT NOT NULL,
+    MODIFY `Sensor3` FLOAT NOT NULL;
+
+-- CreateTable
+CREATE TABLE `Servo` (
+    `DeviceID` VARCHAR(255) NOT NULL,
+    `Angle` FLOAT NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`createdAt`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Servo` ADD CONSTRAINT `Servo_DeviceID_fkey` FOREIGN KEY (`DeviceID`) REFERENCES `Datastream`(`DeviceID`) ON DELETE RESTRICT ON UPDATE CASCADE;
