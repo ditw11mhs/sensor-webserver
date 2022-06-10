@@ -22,10 +22,10 @@ const userPayload = {
   }),
 };
 
-const servoPayload = {
+const servoUserPayload = {
   body: Joi.object({
     DeviceID: Joi.string().required(),
-    Servo: Joi.number().required(),
+    Angle: Joi.number().required(),
   }),
 };
 
@@ -88,9 +88,9 @@ app.post(
       const deleteoldestLog = await prisma.datalog.delete({
         where: { createdAt: oldestLog.createdAt },
       });
-      res.json(result, deleteoldestLog);
+      res.status(200);
     } else {
-      res.json(result);
+      res.status(200);
     }
   }
 );
@@ -100,6 +100,13 @@ app.get("/datastream/get", validate(userPayload, {}, {}), async (req, res) => {
   const { DeviceID } = req.body;
   const result = await prisma.datastream.findUnique({
     where: { DeviceID: String(DeviceID) },
+    select: {
+      DeviceID: false,
+      Sensor1: true,
+      Sensor2: true,
+      Sensor3: true,
+      createdAt: false,
+    },
   });
   res.json([result]);
 });
@@ -107,20 +114,38 @@ app.get("/datastream/get", validate(userPayload, {}, {}), async (req, res) => {
 // Get logs from Database
 app.get("/datalog/get", validate(userPayload, {}, {}), async (req, res) => {
   const { DeviceID } = req.body;
-  const result = await prisma.datastream.findUnique({
+  const result = await prisma.datalog.findMany({
     where: { DeviceID: String(DeviceID) },
-    include: { Logs: true },
   });
   res.json([result]);
 });
 
-app.post("/servo/update", validate(servoPayload, {}, {}), async (req, res) => {
-  const { DeviceID, Servo } = req.body;
-  const result = await prisma.servo.update({
+// Update Servo Angle
+app.post(
+  "/servo/update",
+  validate(servoUserPayload, {}, {}),
+  async (req, res) => {
+    const { DeviceID, Angle } = req.body;
+    const result = await prisma.servo.update({
+      where: { DeviceID: String(DeviceID) },
+      data: {
+        Angle: Number(Angle),
+        createdAt: new Date(),
+      },
+    });
+    res.status(200);
+  }
+);
+
+// Get Servo Angle
+app.get("/servo/get", validate(userPayload, {}, {}), async (req, res) => {
+  const { DeviceID } = req.body;
+  const result = await prisma.servo.findUnique({
     where: { DeviceID: String(DeviceID) },
-    update: {
-      Angle: Number(Servo),
-      createdAt: new Date(),
+    select: {
+      DeviceID: false,
+      Angle: true,
+      createdAt: false,
     },
   });
 });

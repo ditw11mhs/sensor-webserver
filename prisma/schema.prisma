@@ -31,7 +31,7 @@ model Datalog {
 
 model Servo {
   Device    Datastream @relation(fields: [DeviceID], references: [DeviceID])
-  DeviceID  String     @db.VarChar(255)
+  DeviceID  String     @id @db.VarChar(255)
   Angle     Float      @default(0) @db.Float
-  createdAt DateTime   @id @default(now())
+  createdAt DateTime   @default(now())
 }
