@@ -68,7 +68,7 @@ app.post(
       },
     });
 
-    if (result._count.Logs > 10) {
+    if (result._count.Logs > 100) {
       const oldestLog = await prisma.datalog.findFirst({
         where: { DeviceID: String(DeviceID) },
         orderBy: { createdAt: "asc" },
@@ -76,7 +76,7 @@ app.post(
       const deleteoldestLog = await prisma.datalog.delete({
         where: { createdAt: oldestLog.createdAt },
       });
-      res.json(result);
+      res.json(result, deleteoldestLog);
     } else {
       res.json(result);
     }
