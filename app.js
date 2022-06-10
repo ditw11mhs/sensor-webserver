@@ -22,6 +22,13 @@ const userPayload = {
   }),
 };
 
+const servoPayload = {
+  body: Joi.object({
+    DeviceID: Joi.string().required(),
+    Servo: Joi.number().required(),
+  }),
+};
+
 // Test
 app.get("/", (req, res) => {
   res.send("Test");
@@ -53,6 +60,11 @@ app.post(
         Sensor1: Number(Sensor1),
         Sensor2: Number(Sensor2),
         Sensor3: Number(Sensor3),
+        Servo: {
+          create: {
+            Angle: 0.0,
+          },
+        },
         Logs: {
           create: {
             Sensor1: Number(Sensor1),
@@ -100,6 +112,17 @@ app.get("/datalog/get", validate(userPayload, {}, {}), async (req, res) => {
     include: { Logs: true },
   });
   res.json([result]);
+});
+
+app.post("/servo/update", validate(servoPayload, {}, {}), async (req, res) => {
+  const { DeviceID, Servo } = req.body;
+  const result = await prisma.servo.update({
+    where: { DeviceID: String(DeviceID) },
+    update: {
+      Angle: Number(Servo),
+      createdAt: new Date(),
+    },
+  });
 });
 
 app.use(function (err, req, res, next) {
