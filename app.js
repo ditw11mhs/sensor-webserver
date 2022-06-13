@@ -39,92 +39,108 @@ app.post(
   "/datastream/update",
   validate(esp32Payload, {}, {}),
   async (req, res) => {
-    const { DeviceID, Sensor1, Sensor2, Sensor3 } = req.body;
-    const result = await prisma.datastream.upsert({
-      where: { DeviceID: String(DeviceID) },
-      update: {
-        Sensor1: Number(Sensor1),
-        Sensor2: Number(Sensor2),
-        Sensor3: Number(Sensor3),
-        createdAt: new Date(),
-        Logs: {
-          create: {
-            Sensor1: Number(Sensor1),
-            Sensor2: Number(Sensor2),
-            Sensor3: Number(Sensor3),
-          },
-        },
-      },
-      create: {
-        DeviceID: DeviceID,
-        Sensor1: Number(Sensor1),
-        Sensor2: Number(Sensor2),
-        Sensor3: Number(Sensor3),
-        Servo: {
-          create: {
-            Angle: 0.0,
-          },
-        },
-        Logs: {
-          create: {
-            Sensor1: Number(Sensor1),
-            Sensor2: Number(Sensor2),
-            Sensor3: Number(Sensor3),
-          },
-        },
-      },
-      include: {
-        _count: {
-          select: { Logs: true },
-        },
-      },
-    });
-
-    if (result._count.Logs > 100) {
-      const oldestLog = await prisma.datalog.findFirst({
+    try {
+      const { DeviceID, Sensor1, Sensor2, Sensor3 } = req.body;
+      const result = await prisma.datastream.upsert({
         where: { DeviceID: String(DeviceID) },
-        orderBy: { createdAt: "asc" },
+        update: {
+          Sensor1: Number(Sensor1),
+          Sensor2: Number(Sensor2),
+          Sensor3: Number(Sensor3),
+          createdAt: new Date(),
+          Logs: {
+            create: {
+              Sensor1: Number(Sensor1),
+              Sensor2: Number(Sensor2),
+              Sensor3: Number(Sensor3),
+            },
+          },
+        },
+        create: {
+          DeviceID: DeviceID,
+          Sensor1: Number(Sensor1),
+          Sensor2: Number(Sensor2),
+          Sensor3: Number(Sensor3),
+          Servo: {
+            create: {
+              Angle: 0.0,
+            },
+          },
+          Logs: {
+            create: {
+              Sensor1: Number(Sensor1),
+              Sensor2: Number(Sensor2),
+              Sensor3: Number(Sensor3),
+            },
+          },
+        },
+        include: {
+          DeviceID: true,
+          _count: {
+            select: { Logs: true },
+          },
+        },
       });
-      const deleteoldestLog = await prisma.datalog.delete({
-        where: { createdAt: oldestLog.createdAt },
-      });
-      res.status(200).json(result, deleteoldestLog);
-    } else {
-      res.status(200).json(result);
+
+      if (result._count.Logs > 100) {
+        const oldestLog = await prisma.datalog.findFirst({
+          where: { DeviceID: String(DeviceID) },
+          orderBy: { createdAt: "asc" },
+        });
+        const deleteoldestLog = await prisma.datalog.delete({
+          where: { createdAt: oldestLog.createdAt },
+        });
+        res.status(200).json(result, deleteoldestLog);
+      } else {
+        res.status(200).json(result);
+      }
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("server error");
     }
   }
 );
 
 // Get stream from Database
-app.get("/datastream/get", validate(userPayload, {}, {}), async (req, res) => {
-  const { DeviceID } = req.body;
-  const result = await prisma.datastream.findUnique({
-    where: { DeviceID: String(DeviceID) },
-    select: {
-      DeviceID: false,
-      Sensor1: true,
-      Sensor2: true,
-      Sensor3: true,
-      createdAt: false,
-    },
-  });
-  res.json(result);
+app.get("/datastream/get", async (req, res) => {
+  try {
+    const DeviceID = req.query.DeviceID;
+    const result = await prisma.datastream.findUnique({
+      where: { DeviceID: String(DeviceID) },
+      select: {
+        DeviceID: false,
+        Sensor1: true,
+        Sensor2: true,
+        Sensor3: true,
+        createdAt: false,
+      },
+    });
+    res.json(result);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("server error");
+  }
 });
 
 // Get logs from Database
-app.get("/datalog/get", validate(userPayload, {}, {}), async (req, res) => {
-  const { DeviceID } = req.body;
-  const result = await prisma.datalog.findMany({
-    where: { DeviceID: String(DeviceID) },
-    select: {
-      DeviceID: false,
-      Sensor1: true,
-      Sensor2: true,
-      Sensor3: true,
-      createdAt: true,
-    },
-  });
-  res.json(result);
+app.get("/datalog/get", async (req, res) => {
+  try {
+    const DeviceID = req.query.DeviceID;
+    const result = await prisma.datalog.findMany({
+      where: { DeviceID: String(DeviceID) },
+      select: {
+        DeviceID: false,
+        Sensor1: true,
+        Sensor2: true,
+        Sensor3: true,
+        createdAt: true,
+      },
+    });
+    res.json(result);
+  } catch (error) {
+    console.error(err.message);
+    res.status(500).send("server error");
+  }
 });
 
 // Update Servo Angle
@@ -132,30 +148,40 @@ app.post(
   "/servo/update",
   validate(servoUserPayload, {}, {}),
   async (req, res) => {
-    const { DeviceID, Angle } = req.body;
-    const result = await prisma.servo.update({
-      where: { DeviceID: String(DeviceID) },
-      data: {
-        Angle: Number(Angle),
-        createdAt: new Date(),
-      },
-    });
-    res.status(200).json(result);
+    try {
+      const { DeviceID, Angle } = req.body;
+      const result = await prisma.servo.update({
+        where: { DeviceID: String(DeviceID) },
+        data: {
+          Angle: Number(Angle),
+          createdAt: new Date(),
+        },
+      });
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(err.message);
+      res.status(500).send("server error");
+    }
   }
 );
 
 // Get Servo Angle
-app.get("/servo/get", validate(userPayload, {}, {}), async (req, res) => {
-  const { DeviceID } = req.body;
-  const result = await prisma.servo.findUnique({
-    where: { DeviceID: String(DeviceID) },
-    select: {
-      DeviceID: false,
-      Angle: true,
-      createdAt: false,
-    },
-  });
-  res.json(result);
+app.get("/servo/get", async (req, res) => {
+  try {
+    const DeviceID = req.query.DeviceID;
+    const result = await prisma.servo.findUnique({
+      where: { DeviceID: String(DeviceID) },
+      select: {
+        DeviceID: false,
+        Angle: true,
+        createdAt: false,
+      },
+    });
+    res.json(result);
+  } catch (error) {
+    console.error(err.message);
+    res.status(500).send("server error");
+  }
 });
 
 app.use(function (err, req, res, next) {
