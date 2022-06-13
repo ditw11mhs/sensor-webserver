@@ -75,7 +75,6 @@ app.post(
           },
         },
         include: {
-          DeviceID: true,
           _count: {
             select: { Logs: true },
           },
@@ -90,13 +89,13 @@ app.post(
         const deleteoldestLog = await prisma.datalog.delete({
           where: { createdAt: oldestLog.createdAt },
         });
-        res.status(200).json(result, deleteoldestLog);
+        res.status(200).json([result, deleteoldestLog]);
       } else {
         res.status(200).json(result);
       }
     } catch (err) {
       console.error(err.message);
-      res.status(500).send("server error");
+      res.status(500).json("server error");
     }
   }
 );
